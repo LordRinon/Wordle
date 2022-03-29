@@ -11,7 +11,9 @@ import android.view.View;
 import android.widget.Button;
 
 import java.net.BindException;
+import java.util.Arrays;
 import java.util.Random;
+import java.util.Arrays;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -21,12 +23,14 @@ public class MainActivity extends AppCompatActivity {
     private Button boxes[][];
     private String answer = "TRAIN";
     final Random myRandom = new Random();
+    private int alphabet[] = new int[100];
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Arrays.fill(alphabet, 0);
     }
 
     // Adds a new letter
@@ -60,18 +64,19 @@ public class MainActivity extends AppCompatActivity {
                     String letter = (String) getBox(i, k).getText();
                     if (answer.contains(letter)) {
                         getBox(i, k).setBackgroundColor(Color.YELLOW);
-                        if (getButton(letter).getAlpha()!=0.99F) {
+                        if (alphabet[(int)letter.charAt(0)] != 3) {
                             getButton(letter).setBackgroundColor(Color.YELLOW);
-                            getButton(letter).setAlpha(0.98F);
+                            alphabet[(int)letter.charAt(0)]=2;
                         }
                         if (k == answer.indexOf(letter)) {
                             getBox(i, k).setBackgroundColor(Color.GREEN);
                             getButton(letter).setBackgroundColor(Color.GREEN);
-                            getButton(letter).setAlpha(0.99F);
+                            alphabet[(int)letter.charAt(0)]=3;
                         }
                     } else {
                         getBox(i, k).setBackgroundColor(Color.GRAY);
                         getButton(letter).setBackgroundColor(Color.GRAY);
+                        alphabet[(int)letter.charAt(0)]=1;
                     }
                 }
                 i++;
@@ -89,20 +94,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Clears a random letter
-    // TODO Fix error with selecting already fixed letters
     public void clear(View view){
         while(true) {
             int ASCII_value = myRandom.nextInt(26);
             ASCII_value += 65;
             String letter = Character.toString((char) ASCII_value);
-            if (getButton(letter).getAlpha() != 0.99F || getButton(letter).getAlpha()!=0.98F){
+            if (alphabet[ASCII_value] == 0 || checkAlphabet()){
+                Log.d("Alphabet", letter + " " + ASCII_value);
                 if (answer.contains(letter)) {
-                    if (getButton(letter).getAlpha()!=0.99F) {
+                    if (alphabet[ASCII_value] != 3) {
                         getButton(letter).setBackgroundColor(Color.YELLOW);
-                        getButton(letter).setAlpha(0.98F);
+                        alphabet[ASCII_value] = 2;
                     }
                 }
                 else getButton(letter).setBackgroundColor(Color.GRAY);
+                alphabet[ASCII_value] = 1;
                 break;
             }
         }
@@ -127,6 +133,16 @@ public class MainActivity extends AppCompatActivity {
         //getBox(5,2).setText(Character.toString(value.charAt(2)));
         Log.d("success", value);
         return true;
+    }
+
+    // Values above 0
+    public boolean checkAlphabet(){
+        int count = 0;
+        for (int k = 65; k <= 90; k++) {
+            if(alphabet[k] > 0) count++;
+        }
+        if (count >= 26) return true;
+        return false;
     }
 
     // Gets Reference for the needed box
